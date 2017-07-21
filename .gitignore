@@ -1,0 +1,22 @@
+*.class
+.idea/
+*.impl
+target/
+.project
+.classpath
+*.iml
+.settings/
+.svn/
+*.log
+.DS_Store
+# Package Files #
+*.jar
+*.war
+*.ear
+.metadata
+build/
+out/
+*.bak/
+*.bak
+.gradle/
+.git/
