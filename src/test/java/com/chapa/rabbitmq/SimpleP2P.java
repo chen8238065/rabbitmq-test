@@ -1,8 +1,9 @@
 package com.chapa.rabbitmq;
 
-import com.rabbitmq.client.GetResponse;
-import com.rabbitmq.client.QueueingConsumer;
+import com.rabbitmq.client.*;
 import org.junit.Test;
+
+import java.io.IOException;
 
 /**
  * Created by chapa on 16-8-19.
@@ -21,9 +22,9 @@ public class SimpleP2P extends  TestBase {
         }
     }
 
-    // 避免  QueueingConsumer  OOM
+    //QueueingConsumer  维护一个本地队列 客户端异步处理推送过来的消息
     @Test
-    public void receive() throws Exception {
+    public void receiveAsync() throws Exception {
         channel.queueDeclare(QUEUE_NAME, false, false, false, null);
         // set Prefetch count 每次推送 1000条消息
         channel.basicQos(1000);
@@ -42,6 +43,25 @@ public class SimpleP2P extends  TestBase {
            // 手动发送 ack 消息
             channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
         }
+    }
+    @Test
+    public void syncReceive()throws Exception {
+        channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+        // set Prefetch count 每次推送 1000条消息
+        channel.basicQos(1000);
+        System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
+
+        Consumer consumer =new DefaultConsumer(channel) {
+            @Override
+            public void handleDelivery(String consumerTag, Envelope envelope,
+                                       AMQP.BasicProperties properties, byte[] body)
+                    throws IOException {
+                String message = new String(body, "UTF-8");
+                System.out.println(" [x] Received '" + message + "'");
+            }
+        };
+        channel.basicConsume(QUEUE_NAME, true, consumer);
+        Thread.currentThread().join();
     }
 
     @Test
